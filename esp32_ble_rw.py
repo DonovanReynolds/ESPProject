@@ -4,7 +4,7 @@ import os
 from bleak import BleakClient
 
 # ESP32 MAC address
-DEVICE_ADDRESS = "14:2b:2f:da:dc:5e"
+DEVICE_ADDRESS = "8c:4f:00:15:4d:7a"
 
 # UUIDs for GATT characteristics
 FILE_RW_CHAR_UUID = "00001526-1212-efde-1523-785feabcd123"     # Read/write file data
@@ -21,6 +21,12 @@ async def write_file(client, filepath):
     for i in range(0, len(data), CHUNK_SIZE):
         chunk = data[i:i+CHUNK_SIZE]
         await client.write_gatt_char(FILE_RW_CHAR_UUID, chunk)
+
+    # If it's a .bin file, send OTA_END to trigger esp_restart()
+    if filepath.lower().endswith(".bin"):
+        print("Sending OTA_END signal...")
+        await client.write_gatt_char(FILE_RW_CHAR_UUID, b"OTA_END")
+
     print("File sent to ESP32!")
 
 # --- Download ---
@@ -57,11 +63,15 @@ async def run(upload_path):
     async with BleakClient(DEVICE_ADDRESS) as client:
         await write_file(client, upload_path)
 
+        # Skip reading if it's a .bin file
+        if upload_path.lower().endswith(".bin"):
+            print("Skipping read step for .bin file.")
+            return
+
         try:
             await read_file(client, download_path)
         except Exception as e:
             print(f"Skipping read step due to error: {e}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -101,36 +101,6 @@ static void check_valid_partition(void *param)
 
 
 void app_main(void) {
-    /*
-    const esp_partition_t *partition = NULL;
-
-    // Check each partition and pass NULL for the label if not needed
-    partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
-    if (partition != NULL) {
-        ESP_LOGI("Partition", "app0 offset: 0x%" PRIX32 " size: 0x%" PRIu32, partition->address, partition->size);
-    }
-
-    partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_1, NULL);
-    if (partition != NULL) {
-        ESP_LOGI("Partition", "app1 offset: 0x%" PRIX32 " size: 0x%" PRIu32, partition->address, partition->size);
-    }
-
-    partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_OTA, NULL);
-    if (partition != NULL) {
-        ESP_LOGI("Partition", "otadata offset: 0x%" PRIX32 " size: 0x%" PRIu32, partition->address, partition->size);
-    }
-
-    partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, NULL);
-    if (partition != NULL) {
-        ESP_LOGI("Partition", "nvs offset: 0x%" PRIX32 " size: 0x%" PRIu32, partition->address, partition->size);
-    }
-
-    partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, NULL);
-    if (partition != NULL) {
-        ESP_LOGI("Partition", "spiffs offset: 0x%" PRIX32 " size: 0x%" PRIu32, partition->address, partition->size);
-    }
-    */
-   
     /* Local variables */
     int rc;
     esp_err_t ret;
@@ -158,7 +128,6 @@ void app_main(void) {
                  total, used);
     }
 
-    /* Optional: Check if file exists, or create it */
     FILE *fp = fopen("/spiffs/upload.txt", "a+");
     if (fp) {
         fclose(fp);
@@ -166,7 +135,6 @@ void app_main(void) {
     } else {
         ESP_LOGE(TAG, "Could not create initial file");
     }
-
 
     /*
      * NVS flash initialization
@@ -211,10 +179,5 @@ void app_main(void) {
     /* Start NimBLE host task thread and return */
     //xTaskCreate(check_valid_partition, "Partition Checki", 4*1024, NULL, 5, NULL);
     xTaskCreate(nimble_host_task, "NimBLE Host", 4*1024, NULL, 5, NULL);
-    // while(1)
-    // {
-    //     printf("\nYO");
-    //     vTaskDelay(1000/portTICK_PERIOD_MS);
-    // }
     return;
 }
